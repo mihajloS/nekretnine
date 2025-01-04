@@ -1,22 +1,18 @@
-import { useState } from "react";
-import { Layout } from "./Layout";
-import { ThemeContext } from "./ThemeContext";
-import { Provider } from "@/components/ui/provider"
+import { Layout } from './Layout';
+import { ColorModeProvider } from '@/components/ui/color-mode';
+import { Provider } from '@/components/ui/provider';
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 
 function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
-
   return (
-    <ThemeContext.Provider value={{theme, toggleTheme}}> 
-      <Provider>
-        <Layout/>
-      </Provider>
-    </ThemeContext.Provider>
-  )
+    <Provider>
+      <ChakraProvider value={defaultSystem}>
+        <ColorModeProvider>
+          <Layout />
+        </ColorModeProvider>
+      </ChakraProvider>
+    </Provider>
+  );
 }
 
-export default App
+export default App;
