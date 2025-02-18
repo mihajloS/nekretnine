@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// _ je razmak u izvornoj tabeli
+enum TipLokacije {
+  ULICA
+  ZASEOK
+  NASELJENO_MESTO
+  TRG
+}
+
+model Lokacije {
+  id Int @default(autoincrement()) @id
+  opstina String
+  naselje String
+  tip String
+  wkt String // Well-Known Text. https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry
+
+  // IIT: iz izvorne tabela  
+  idIIT Int
+  lastModifiedIIT DateTime
+}
+
+model LokacijeIIT {
+  id Int @default(autoincrement()) @id
+  streetid String
+  ulica_maticni_broj String
+  ulica_ime String
+  ulica_ime_lat String
+  tip String
+  tip_lat String
+  created String
+  modificationdate String
+  retired String
+  naselje_maticni_broj String
+  naselje_ime String
+  naselje_ime_lat String
+  opstina_maticni_broj String
+  opstina_ime String
+  opstina_ime_lat String
+  primary_key String @unique
+  wkt String
+}
