@@ -14,6 +14,16 @@ export class LocationsController {
     return await this.locationsService.search(query, type);
   }
 
+  @Get('getAllCities')
+  async getAllCities(): Promise<LocationDto[]> {
+    return await this.locationsService.getAllCities();
+  }
+
+  @Get('getAreasPerCity')
+  async getAreasPerCity(@Query('city') city: string): Promise<LocationDto[]> {
+    return await this.locationsService.getAreasPerCity(city);
+  }
+
   @Get()
   findAll() {
     return this.locationsService.findAll();

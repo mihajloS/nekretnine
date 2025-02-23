@@ -22,6 +22,31 @@ export class LocationsService {
     return result.map(mapToLocationDto);
   }
 
+  async getAllCities(): Promise<LocationDto[]> {
+    const result = await this.db.lokacijeIIT.findMany({
+      distinct: ['opstina_ime_lat'],
+      select: {
+        opstina_ime_lat: true,
+      },
+    });
+
+    return result.map(mapToLocationDto);
+  }
+
+  async getAreasPerCity(city: string): Promise<LocationDto[]> {
+    const result = await this.db.lokacijeIIT.findMany({
+      where: {
+        opstina_ime_lat: city,
+      },
+      distinct: ['naselje_ime_lat'],
+      select: {
+        naselje_ime_lat: true,
+      },
+    });
+
+    return result.map(mapToLocationDto);
+  }
+
   findAll() {
     return `This action returns all locations`;
   }
