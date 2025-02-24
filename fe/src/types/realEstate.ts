@@ -16,8 +16,8 @@ export interface Location {
 }
 
 export interface RealEstateDataSource {
-  getProperties: () => Property[];
+  getProperties: () => Promise<Property[]>;
   getCities: () => Promise<Location[]>;
   getAreas: (city?: string) => Promise<Location[]>;
-  getStreets: () => Location[];
+  getStreets: (city: string, area?: string) => Promise<Location[]>;
 }

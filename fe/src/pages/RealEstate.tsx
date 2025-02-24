@@ -1,51 +1,47 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import DropdownSelector from '@/components/DropdownSelector';
-import { mockRealEstateData } from '@/data/mockRealEstateData';
+import { useQuery } from '@tanstack/react-query';
+// import { mockRealEstateData } from '@/data/mockRealEstateData';
 import { realRealEstateData } from '@/data/realRealEstateData'; // Uncomment to use real data
 import type { Property } from '@/types/realEstate';
 import type { Location } from '@/types/realEstate';
 
-// Use mockRealEstateData for development, switch to realRealEstateData for production
-const dataSource = realRealEstateData;
-
 const RealEstate = () => {
   const [selectedCity, setSelectedCity] = useState<string | undefined>();
-  const [selectedArea, setSelectedArea] = useState<Location | undefined>();
+  const [selectedArea, setSelectedArea] = useState<string | undefined>();
   const [selectedStreet, setSelectedStreet] = useState('');
-  const [cities, setCities] = useState<Location[]>([]);
-  const [areas, setAreas] = useState<Location[]>([]);
-  const [streets, setStreets] = useState<Location[]>([]);
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
 
-  // Fetch data from the data source
-  useEffect(() => {
-    const fetchData = async () => {
-      const citiesData = await dataSource.getCities();
-      console.log('citiesData', citiesData);
-      const areasData = await dataSource.getAreas(selectedCity);
-      const streetsData = dataSource.getStreets();
-      const propertiesData = dataSource.getProperties();
+  const { data: cities } = useQuery({
+    queryKey: ['cities'],
+    queryFn: fetchCities,
+  });
 
-      setCities(citiesData);
-      setAreas(areasData);
-      setStreets(streetsData);
-      setAllProperties(propertiesData);
-    };
+  const { data: areas } = useQuery({
+    queryKey: ['areas', selectedCity],
+    queryFn: () => fetchAreas(selectedCity!),
+    enabled: !!selectedCity,
+  });
 
-    fetchData();
-  }, []);
+  const { data: streets } = useQuery({
+    queryKey: ['streets', selectedCity, selectedArea],
+    queryFn: () => getStreets(selectedCity!, selectedArea),
+    enabled: !!selectedCity,
+  });
+
+  const { data: allProperties } = useQuery({
+    queryKey: ['allProperties'],
+    queryFn: dataSource.getProperties,
+  });
 
   // Filter properties based on selection
   const filteredProperties = useMemo(() => {
-    return allProperties.filter((property) => {
+    return (allProperties || []).filter((property) => {
       const cityMatch = !selectedCity || property.city === selectedCity;
       const areaMatch = !selectedArea || property.area === selectedArea;
       const streetMatch = !selectedStreet || property.street === selectedStreet;
       return cityMatch && areaMatch && streetMatch;
     });
   }, [selectedCity, selectedArea, selectedStreet, allProperties]);
-
-  console.log('cities', cities);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -62,14 +58,16 @@ const RealEstate = () => {
             <div className="space-y-4">
               <div className="animate-fade-in">
                 <DropdownSelector
-                  options={cities}
+                  options={cities || []}
                   value={selectedCity}
                   onChange={(value) => {
                     console.log('value', value);
-                    setSelectedCity(value);
+                    const cityName = cities.find(
+                      (city) => city.value === value
+                    ).label;
+                    setSelectedCity(cityName);
                   }}
                   placeholder="Select a city"
-                  virtualized
                 />
               </div>
 
@@ -77,9 +75,14 @@ const RealEstate = () => {
                 <>
                   <div className="animate-fade-in">
                     <DropdownSelector
-                      options={areas}
+                      options={areas || []}
                       value={selectedArea}
-                      onChange={setSelectedArea}
+                      onChange={(value) => {
+                        const areaName = areas.find(
+                          (area) => area.value === value
+                        ).label;
+                        setSelectedArea(areaName);
+                      }}
                       placeholder="Select an area (optional)"
                       disabled={!selectedCity}
                     />
@@ -87,7 +90,7 @@ const RealEstate = () => {
 
                   <div className="animate-fade-in">
                     <DropdownSelector
-                      options={streets}
+                      options={streets || []}
                       value={selectedStreet}
                       onChange={setSelectedStreet}
                       placeholder="Select a street (optional)"
@@ -144,6 +147,21 @@ const RealEstate = () => {
       </div>
     </div>
   );
+};
+
+// Use mockRealEstateData for development, switch to realRealEstateData for production
+const dataSource = realRealEstateData;
+
+const fetchCities = async () => {
+  return await dataSource.getCities();
+};
+
+const fetchAreas = async (city: string) => {
+  return await dataSource.getAreas(city);
+};
+
+const getStreets = async (city: string, area?: string) => {
+  return await dataSource.getStreets(city, area);
 };
 
 export default RealEstate;
