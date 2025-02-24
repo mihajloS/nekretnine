@@ -6,12 +6,12 @@ import { LocationDto } from './dto/location.dto';
 export class LocationsController {
   constructor(private readonly locationsService: LocationsService) {}
 
-  @Get('search')
-  async search(
-    @Query('query') query: string,
-    @Query('type') type?: 'street' | 'city' | 'area', // Opcioni parametar
+  @Get('getStreets')
+  async getStreets(
+    @Query('city') city: string,
+    @Query('area') area?: string,
   ): Promise<LocationDto[]> {
-    return await this.locationsService.search(query, type);
+    return await this.locationsService.getStreets(city, area);
   }
 
   @Get('getAllCities')

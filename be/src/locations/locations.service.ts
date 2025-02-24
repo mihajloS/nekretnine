@@ -6,16 +6,14 @@ import { LocationDto, mapToLocationDto } from './dto/location.dto';
 export class LocationsService {
   constructor(private db: Prismaservice) {}
 
-  async search(
-    query: string,
-    _type?: 'street' | 'city' | 'area',
-  ): Promise<LocationDto[]> {
+  async getStreets(city: string, area?: string): Promise<LocationDto[]> {
     const result = await this.db.lokacijeIIT.findMany({
+      distinct: ['ulica_ime_lat'],
       where: {
-        ulica_ime_lat: {
-          contains: query, // Pronalazi sve gde 'ulica_ime_lat' sadrži 'query'
-          mode: 'insensitive', // Opciono - ne razlikuje mala i velika slova
-        },
+        opstina_ime_lat: { contains: city, mode: 'insensitive' },
+        naselje_ime_lat: area
+          ? { contains: area, mode: 'insensitive' }
+          : undefined,
       },
     });
 
@@ -27,6 +25,7 @@ export class LocationsService {
       distinct: ['opstina_ime_lat'],
       select: {
         opstina_ime_lat: true,
+        primary_key: true,
       },
     });
 
@@ -41,6 +40,7 @@ export class LocationsService {
       distinct: ['naselje_ime_lat'],
       select: {
         naselje_ime_lat: true,
+        primary_key: true,
       },
     });
 
